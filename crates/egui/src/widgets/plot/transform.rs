@@ -8,8 +8,8 @@ use crate::*;
 #[derive(Clone, Copy, PartialEq, Debug)]
 #[cfg_attr(feature = "serde", derive(serde::Deserialize, serde::Serialize))]
 pub struct PlotBounds {
-    pub(crate) min: [f64; 2],
-    pub(crate) max: [f64; 2],
+    pub min: [f64; 2],
+    pub max: [f64; 2],
 }
 
 impl PlotBounds {
@@ -61,100 +61,100 @@ impl PlotBounds {
     }
 
     /// Expand to include the given (x,y) value
-    pub(crate) fn extend_with(&mut self, value: &PlotPoint) {
+    pub fn extend_with(&mut self, value: &PlotPoint) {
         self.extend_with_x(value.x);
         self.extend_with_y(value.y);
     }
 
     /// Expand to include the given x coordinate
-    pub(crate) fn extend_with_x(&mut self, x: f64) {
+    pub fn extend_with_x(&mut self, x: f64) {
         self.min[0] = self.min[0].min(x);
         self.max[0] = self.max[0].max(x);
     }
 
     /// Expand to include the given y coordinate
-    pub(crate) fn extend_with_y(&mut self, y: f64) {
+    pub fn extend_with_y(&mut self, y: f64) {
         self.min[1] = self.min[1].min(y);
         self.max[1] = self.max[1].max(y);
     }
 
-    pub(crate) fn expand_x(&mut self, pad: f64) {
+    pub fn expand_x(&mut self, pad: f64) {
         self.min[0] -= pad;
         self.max[0] += pad;
     }
 
-    pub(crate) fn expand_y(&mut self, pad: f64) {
+    pub fn expand_y(&mut self, pad: f64) {
         self.min[1] -= pad;
         self.max[1] += pad;
     }
 
-    pub(crate) fn merge_x(&mut self, other: &PlotBounds) {
+    pub fn merge_x(&mut self, other: &PlotBounds) {
         self.min[0] = self.min[0].min(other.min[0]);
         self.max[0] = self.max[0].max(other.max[0]);
     }
 
-    pub(crate) fn merge_y(&mut self, other: &PlotBounds) {
+    pub fn merge_y(&mut self, other: &PlotBounds) {
         self.min[1] = self.min[1].min(other.min[1]);
         self.max[1] = self.max[1].max(other.max[1]);
     }
 
-    pub(crate) fn set_x(&mut self, other: &PlotBounds) {
+    pub fn set_x(&mut self, other: &PlotBounds) {
         self.min[0] = other.min[0];
         self.max[0] = other.max[0];
     }
 
-    pub(crate) fn set_y(&mut self, other: &PlotBounds) {
+    pub fn set_y(&mut self, other: &PlotBounds) {
         self.min[1] = other.min[1];
         self.max[1] = other.max[1];
     }
 
-    pub(crate) fn merge(&mut self, other: &PlotBounds) {
+    pub fn merge(&mut self, other: &PlotBounds) {
         self.min[0] = self.min[0].min(other.min[0]);
         self.min[1] = self.min[1].min(other.min[1]);
         self.max[0] = self.max[0].max(other.max[0]);
         self.max[1] = self.max[1].max(other.max[1]);
     }
 
-    pub(crate) fn translate_x(&mut self, delta: f64) {
+    pub fn translate_x(&mut self, delta: f64) {
         self.min[0] += delta;
         self.max[0] += delta;
     }
 
-    pub(crate) fn translate_y(&mut self, delta: f64) {
+    pub fn translate_y(&mut self, delta: f64) {
         self.min[1] += delta;
         self.max[1] += delta;
     }
 
-    pub(crate) fn translate(&mut self, delta: Vec2) {
+    pub fn translate(&mut self, delta: Vec2) {
         self.translate_x(delta.x as f64);
         self.translate_y(delta.y as f64);
     }
 
-    pub(crate) fn add_relative_margin_x(&mut self, margin_fraction: Vec2) {
+    pub fn add_relative_margin_x(&mut self, margin_fraction: Vec2) {
         let width = self.width().max(0.0);
         self.expand_x(margin_fraction.x as f64 * width);
     }
 
-    pub(crate) fn add_relative_margin_y(&mut self, margin_fraction: Vec2) {
+    pub fn add_relative_margin_y(&mut self, margin_fraction: Vec2) {
         let height = self.height().max(0.0);
         self.expand_y(margin_fraction.y as f64 * height);
     }
 
-    pub(crate) fn range_x(&self) -> RangeInclusive<f64> {
+    pub fn range_x(&self) -> RangeInclusive<f64> {
         self.min[0]..=self.max[0]
     }
 
-    pub(crate) fn range_y(&self) -> RangeInclusive<f64> {
+    pub fn range_y(&self) -> RangeInclusive<f64> {
         self.min[1]..=self.max[1]
     }
 
-    pub(crate) fn make_x_symmetrical(&mut self) {
+    pub fn make_x_symmetrical(&mut self) {
         let x_abs = self.min[0].abs().max(self.max[0].abs());
         self.min[0] = -x_abs;
         self.max[0] = x_abs;
     }
 
-    pub(crate) fn make_y_symmetrical(&mut self) {
+    pub fn make_y_symmetrical(&mut self) {
         let y_abs = self.min[1].abs().max(self.max[1].abs());
         self.min[1] = -y_abs;
         self.max[1] = y_abs;
@@ -164,7 +164,7 @@ impl PlotBounds {
 /// Contains the screen rectangle and the plot bounds and provides methods to transform them.
 #[cfg_attr(feature = "serde", derive(serde::Deserialize, serde::Serialize))]
 #[derive(Clone)]
-pub(crate) struct ScreenTransform {
+pub struct ScreenTransform {
     /// The screen rectangle.
     frame: Rect,
 

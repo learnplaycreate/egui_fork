@@ -4,7 +4,7 @@ use epaint::emath::NumExt;
 use epaint::{Color32, Rgba, Stroke};
 
 /// Trait that abstracts from rectangular 'Value'-like elements, such as bars or boxes
-pub(super) trait RectElement {
+pub trait RectElement {
     fn name(&self) -> &str;
 
     fn bounds_min(&self) -> PlotPoint;
@@ -54,7 +54,7 @@ pub(super) trait RectElement {
 // ----------------------------------------------------------------------------
 // Helper functions
 
-pub(super) fn highlighted_color(mut stroke: Stroke, fill: Color32) -> (Stroke, Color32) {
+pub fn highlighted_color(mut stroke: Stroke, fill: Color32) -> (Stroke, Color32) {
     stroke.width *= 2.0;
     let fill = Rgba::from(fill);
     let fill_alpha = (2.0 * fill.a()).at_most(1.0);

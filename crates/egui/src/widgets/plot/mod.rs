@@ -8,11 +8,12 @@ use epaint::util::FloatOrd;
 
 use items::PlotItem;
 use legend::LegendWidget;
-use transform::ScreenTransform;
+pub use transform::ScreenTransform;
 
 pub use items::{
     Arrows, Bar, BarChart, BoxElem, BoxPlot, BoxSpread, HLine, Line, LineStyle, MarkerShape,
-    Orientation, PlotImage, PlotPoint, PlotPoints, Points, Polygon, Text, VLine,
+    Orientation, PlotImage, PlotPoint, PlotPoints, Points, Polygon, Text, VLine, PlotGeometry, RectElement, 
+    ClosestElem, PlotConfig
 };
 pub use legend::{Corner, Legend};
 pub use transform::PlotBounds;
@@ -21,10 +22,10 @@ mod items;
 mod legend;
 mod transform;
 
-type LabelFormatterFn = dyn Fn(&str, &PlotPoint) -> String;
-type LabelFormatter = Option<Box<LabelFormatterFn>>;
-type AxisFormatterFn = dyn Fn(f64, &RangeInclusive<f64>) -> String;
-type AxisFormatter = Option<Box<AxisFormatterFn>>;
+pub type LabelFormatterFn = dyn Fn(&str, &PlotPoint) -> String;
+pub type LabelFormatter = Option<Box<LabelFormatterFn>>;
+pub type AxisFormatterFn = dyn Fn(f64, &RangeInclusive<f64>) -> String;
+pub type AxisFormatter = Option<Box<AxisFormatterFn>>;
 
 type GridSpacerFn = dyn Fn(GridInput) -> Vec<GridMark>;
 type GridSpacer = Box<GridSpacerFn>;

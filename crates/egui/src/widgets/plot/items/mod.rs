@@ -8,8 +8,8 @@ use epaint::Mesh;
 use crate::*;
 
 use super::{LabelFormatter, PlotBounds, ScreenTransform};
-use rect_elem::*;
-use values::{ClosestElem, PlotGeometry};
+pub use rect_elem::*;
+pub use values::{ClosestElem, PlotGeometry};
 
 pub use bar::Bar;
 pub use box_elem::{BoxElem, BoxSpread};
@@ -23,7 +23,7 @@ mod values;
 const DEFAULT_FILL_ALPHA: f32 = 0.05;
 
 /// Container to pass-through several parameters related to plot visualization
-pub(super) struct PlotConfig<'a> {
+pub struct PlotConfig<'a> {
     pub ui: &'a Ui,
     pub transform: &'a ScreenTransform,
     pub show_x: bool,
