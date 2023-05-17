@@ -172,10 +172,10 @@ pub struct ScreenTransform {
     bounds: PlotBounds,
 
     /// Whether to always center the x-range of the bounds.
-    x_centered: bool,
+    pub x_centered: bool,
 
     /// Whether to always center the y-range of the bounds.
-    y_centered: bool,
+    pub y_centered: bool,
 }
 
 impl ScreenTransform {
