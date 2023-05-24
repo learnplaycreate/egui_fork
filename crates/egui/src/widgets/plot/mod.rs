@@ -6,7 +6,7 @@ use crate::*;
 use epaint::color::Hsva;
 use epaint::util::FloatOrd;
 
-use items::PlotItem;
+pub use items::PlotItem;
 use legend::LegendWidget;
 pub use transform::ScreenTransform;
 

@@ -31,7 +31,7 @@ pub struct PlotConfig<'a> {
 }
 
 /// Trait shared by things that can be drawn in the plot.
-pub(super) trait PlotItem {
+pub trait PlotItem {
     fn shapes(&self, ui: &mut Ui, transform: &ScreenTransform, shapes: &mut Vec<Shape>);
 
     fn initialize(&mut self, x_range: RangeInclusive<f64>);
