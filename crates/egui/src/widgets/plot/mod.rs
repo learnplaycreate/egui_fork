@@ -18,7 +18,7 @@ use epaint::Hsva;
 use items::PlotItem;
 use legend::LegendWidget;
 //lpc add - made public
-pub use transform::ScreenTransform;
+use transform::ScreenTransform;
 
 pub use items::{
     Arrows, Bar, BarChart, BoxElem, BoxPlot, BoxSpread, HLine, Line, LineStyle, MarkerShape,

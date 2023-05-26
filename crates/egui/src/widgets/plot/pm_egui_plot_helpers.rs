@@ -64,7 +64,7 @@ impl PmEguiPlotHelpers{
         }
     }
     
-    pub fn scale_shape_size_from_f64(transform: &ScreenTransform, current_size : f64) -> f64{
+    pub (crate) fn scale_shape_size_from_f64(transform: &ScreenTransform, current_size : f64) -> f64{
         let value_point_1 = PlotPoint::new(0.0, 0.0);
         let value_point_2 = PlotPoint::new(current_size, current_size);
         let pos_1 = transform.position_from_point(&value_point_1);
@@ -73,7 +73,7 @@ impl PmEguiPlotHelpers{
     }
     
     //lpc - todo, would be good to see if we can call something in the screen transform to do this rather than making all it's props public. 
-    pub fn translate_pos_drag(transform: &ScreenTransform, mut delta_pos: Vec2) -> Vec2{
+    pub (crate) fn translate_pos_drag(transform: &ScreenTransform, mut delta_pos: Vec2) -> Vec2{
         if transform.x_centered {
             delta_pos.x = 0.;
         }
@@ -99,7 +99,7 @@ impl PmEguiPlotHelpers{
         }
     }
 
-    pub fn plot_click_handleing(
+    pub (crate) fn plot_click_handleing(
         &self,
         response : Response, 
         last_screen_transform : ScreenTransform
@@ -145,7 +145,7 @@ impl PmEguiPlotHelpers{
         }
     }
 
-    pub fn plot_drag_handling(
+    pub (crate) fn plot_drag_handling(
         &self,
         response : Response, 
         last_screen_transform : ScreenTransform, 
@@ -190,7 +190,7 @@ impl PmEguiPlotHelpers{
         
     }
 
-    pub fn get_shapes_for_live_hover_drawing(
+    pub (crate) fn get_shapes_for_live_hover_drawing(
         &self,
         transform: ScreenTransform,
         pointer: Pos2,
