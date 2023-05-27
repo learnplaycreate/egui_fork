@@ -182,9 +182,10 @@ impl PlotBounds {
 }
 
 /// Contains the screen rectangle and the plot bounds and provides methods to transform them.
+/// lpc - add, moved to pub
 #[cfg_attr(feature = "serde", derive(serde::Deserialize, serde::Serialize))]
 #[derive(Clone)]
-pub(crate) struct ScreenTransform {
+pub struct ScreenTransform {
     /// The screen rectangle.
     frame: Rect,
 
@@ -192,10 +193,12 @@ pub(crate) struct ScreenTransform {
     bounds: PlotBounds,
 
     /// Whether to always center the x-range of the bounds.
-    x_centered: bool,
+    /// lpc add - moved to public
+    pub x_centered: bool,
 
     /// Whether to always center the y-range of the bounds.
-    y_centered: bool,
+    /// lpc add - moved to public
+    pub y_centered: bool,
 }
 
 impl ScreenTransform {

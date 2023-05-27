@@ -1,9 +1,14 @@
 //! Simple plotting library.
+//lpc add
+mod pm_egui_plot_helpers;
+pub use pm_egui_plot_helpers::PmEguiPlotHelpers;
 
 use std::{
     cell::{Cell, RefCell},
     ops::RangeInclusive,
     rc::Rc,
+    //lpc add
+    sync::{Arc, RwLock},
 };
 
 use crate::*;
@@ -12,7 +17,8 @@ use epaint::Hsva;
 
 use items::PlotItem;
 use legend::LegendWidget;
-use transform::ScreenTransform;
+//lpc add - made public
+pub use transform::ScreenTransform;
 
 pub use items::{
     Arrows, Bar, BarChart, BoxElem, BoxPlot, BoxSpread, HLine, Line, LineStyle, MarkerShape,
@@ -295,11 +301,17 @@ pub struct Plot {
     grid_spacers: [GridSpacer; 2],
     sharp_grid_lines: bool,
     clamp_grid: bool,
+    //lpc add
+    pm_egui_plot_helpers: Arc<RwLock<PmEguiPlotHelpers>>,
 }
 
 impl Plot {
     /// Give a unique id for each plot within the same [`Ui`].
-    pub fn new(id_source: impl std::hash::Hash) -> Self {
+    pub fn new(
+        id_source: impl std::hash::Hash,
+        //lpc add
+        pm_egui_plot_helpers: Arc<RwLock<PmEguiPlotHelpers>>,
+    ) -> Self {
         Self {
             id_source: Id::new(id_source),
 
@@ -337,6 +349,8 @@ impl Plot {
             grid_spacers: [log_grid_spacer(10), log_grid_spacer(10)],
             sharp_grid_lines: true,
             clamp_grid: false,
+            //lpc add
+            pm_egui_plot_helpers,
         }
     }
 
@@ -687,6 +701,7 @@ impl Plot {
             clamp_grid,
             grid_spacers,
             sharp_grid_lines,
+            pm_egui_plot_helpers,
         } = self;
 
         // Determine the size of the plot in the UI
@@ -893,12 +908,34 @@ impl Plot {
             }
         }
 
-        // Dragging
-        if allow_drag && response.dragged_by(PointerButton::Primary) {
-            response = response.on_hover_cursor(CursorIcon::Grabbing);
-            transform.translate_bounds(-response.drag_delta());
-            bounds_modified = true.into();
+        //lpc add - note that the code that drags the plot was from the original mod code.
+        if response.dragged_by(PointerButton::Primary) {
+            //todo lpc this currently has a limit of 1 and I'm not even sure it's doing anyting, should test to find the limt that stops code running when it's not required.
+            //debug!("lpc - drag in the mod code - passing to click helper");
+            pm_egui_plot_helpers
+                .read()
+                .unwrap()
+                .plot_click_handleing(response.clone(), last_screen_transform.clone());
+
+            if !pm_egui_plot_helpers
+                .read()
+                .unwrap()
+                .plot_drag_handling(response.clone(), last_screen_transform.clone())
+            {
+                //debug!("lpc - drag in the mod code - back from helper with false");
+                if allow_drag {
+                    response = response.on_hover_cursor(CursorIcon::Grabbing);
+                    transform.translate_bounds(-response.drag_delta());
+                    auto_bounds = false.into();
+                }
+            }
         }
+        // Dragging
+        // if allow_drag && response.dragged_by(PointerButton::Primary) {
+        //     response = response.on_hover_cursor(CursorIcon::Grabbing);
+        //     transform.translate_bounds(-response.drag_delta());
+        //     auto_bounds = false.into();
+        // }
 
         // Zooming
         let mut boxed_zoom_rect = None;
@@ -993,8 +1030,10 @@ impl Plot {
             grid_spacers,
             sharp_grid_lines,
             clamp_grid,
+            //lpc add
+            pm_egui_plot_helpers: Arc::clone(&pm_egui_plot_helpers),
         };
-        let plot_cursors = prepared.ui(ui, &response);
+        prepared.ui(ui, &response, Arc::clone(&pm_egui_plot_helpers));
 
         if let Some(boxed_zoom_rect) = boxed_zoom_rect {
             ui.painter().with_clip_rect(rect).add(boxed_zoom_rect.0);
@@ -1324,10 +1363,18 @@ struct PreparedPlot {
     grid_spacers: [GridSpacer; 2],
     sharp_grid_lines: bool,
     clamp_grid: bool,
+    // lpc add
+    pm_egui_plot_helpers: Arc<RwLock<PmEguiPlotHelpers>>,
 }
 
 impl PreparedPlot {
-    fn ui(self, ui: &mut Ui, response: &Response) -> Vec<Cursor> {
+    fn ui(
+        self,
+        ui: &mut Ui,
+        response: &Response,
+        //lpc add
+        pm_egui_plot_helpers: Arc<RwLock<PmEguiPlotHelpers>>,
+    ) -> Vec<Cursor> {
         let mut axes_shapes = Vec::new();
 
         for d in 0..2 {
@@ -1356,6 +1403,12 @@ impl PreparedPlot {
         }
 
         let cursors = if let Some(pointer) = response.hover_pos() {
+            //lpc add - two lines
+            let mut new_shapres = pm_egui_plot_helpers
+                .read()
+                .unwrap()
+                .get_shapes_for_live_hover_drawing(self.transform.clone(), pointer);
+            shapes.append(&mut new_shapres);
             self.hover(ui, pointer, &mut shapes)
         } else {
             Vec::new()
