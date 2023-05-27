@@ -1,6 +1,6 @@
 use std::sync::{Arc, RwLock};
 use epaint::{Vec2, Pos2, Shape, Stroke, Color32};
-use pm_pattern_logic::{NotificationHandler, PatternPos, Pattern, PatternElement, ClosestPatternElem, ElementKind, CurrentDrawingTool, SelectedElements, ToolKind, get_selected_items_length, AxisKind, ViewSettings};
+use pm_pattern_logic::{NotificationHandler, PatternPos, Pattern, PatternElement, CurrentDrawingTool, SelectedElements, ToolKind, get_selected_items_length, AxisKind, ViewSettings};
 
 use crate::Response;
 
@@ -64,7 +64,7 @@ impl PmEguiPlotHelpers{
         }
     }
     
-    pub (crate) fn scale_shape_size_from_f64(transform: &ScreenTransform, current_size : f64) -> f64{
+    pub (crate) fn _scale_shape_size_from_f64(transform: &ScreenTransform, current_size : f64) -> f64{
         let value_point_1 = PlotPoint::new(0.0, 0.0);
         let value_point_2 = PlotPoint::new(current_size, current_size);
         let pos_1 = transform.position_from_point(&value_point_1);

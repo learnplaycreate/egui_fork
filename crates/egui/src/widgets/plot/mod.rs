@@ -1023,8 +1023,6 @@ impl Plot {
             grid_spacers,
             sharp_grid_lines,
             clamp_grid,
-            //lpc add
-            pm_egui_plot_helpers: Arc::clone(&pm_egui_plot_helpers),
         };
         let plot_cursors = prepared.ui(ui, &response, pm_egui_plot_helpers);
 
@@ -1356,8 +1354,6 @@ struct PreparedPlot {
     grid_spacers: [GridSpacer; 2],
     sharp_grid_lines: bool,
     clamp_grid: bool,
-    // lpc add
-    pm_egui_plot_helpers: Arc<RwLock<PmEguiPlotHelpers>>,
 }
 
 impl PreparedPlot {
