@@ -6,7 +6,7 @@ pub use pm_egui_plot_helpers::PmEguiPlotHelpers;
 use std::{
     cell::{Cell, RefCell},
     ops::RangeInclusive,
-    rc::Rc,
+    rc::Rc, sync::{Arc, RwLock},
 };
 
 use crate::*;
@@ -304,7 +304,7 @@ pub struct Plot {
 
 impl Plot {
     /// Give a unique id for each plot within the same [`Ui`].
-    pub fn new(id_source: impl std::hash::Hash) -> Self {
+    pub fn new(id_source: impl std::hash::Hash, pm_egui_plot_helpers: Arc<RwLock<PmEguiPlotHelpers>>) -> Self {
         Self {
             id_source: Id::new(id_source),
 
@@ -901,12 +901,34 @@ impl Plot {
             }
         }
 
-        // Dragging
-        if allow_drag && response.dragged_by(PointerButton::Primary) {
-            response = response.on_hover_cursor(CursorIcon::Grabbing);
-            transform.translate_bounds(-response.drag_delta());
-            bounds_modified = true.into();
+        //lpc add - note that the code that drags the plot was from the original mod code.
+        if response.dragged_by(PointerButton::Primary) {
+            //todo lpc this currently has a limit of 1 and I'm not even sure it's doing anyting, should test to find the limt that stops code running when it's not required.
+            //debug!("lpc - drag in the mod code - passing to click helper");
+            pm_egui_plot_helpers
+                .read()
+                .unwrap()
+                .plot_click_handleing(response.clone(), last_screen_transform.clone());
+
+            if !pm_egui_plot_helpers
+                .read()
+                .unwrap()
+                .plot_drag_handling(response.clone(), last_screen_transform.clone())
+            {
+                //debug!("lpc - drag in the mod code - back from helper with false");
+                if allow_drag {
+                    response = response.on_hover_cursor(CursorIcon::Grabbing);
+                    transform.translate_bounds(-response.drag_delta());
+                    bounds_modified = true.into();
+                }
+            }
         }
+        // Dragging
+        // if allow_drag && response.dragged_by(PointerButton::Primary) {
+        //     response = response.on_hover_cursor(CursorIcon::Grabbing);
+        //     transform.translate_bounds(-response.drag_delta());
+        //     bounds_modified = true.into();
+        // }
 
         // Zooming
         let mut boxed_zoom_rect = None;
@@ -1004,7 +1026,7 @@ impl Plot {
             //lpc add
             pm_egui_plot_helpers: Arc::clone(&pm_egui_plot_helpers),
         };
-        let plot_cursors = prepared.ui(ui, &response);
+        let plot_cursors = prepared.ui(ui, &response, pm_egui_plot_helpers);
 
         if let Some(boxed_zoom_rect) = boxed_zoom_rect {
             ui.painter().with_clip_rect(rect).add(boxed_zoom_rect.0);
@@ -1374,6 +1396,12 @@ impl PreparedPlot {
         }
 
         let cursors = if let Some(pointer) = response.hover_pos() {
+            //lpc add - two lines
+            let mut new_shapres = pm_egui_plot_helpers
+                .read()
+                .unwrap()
+                .get_shapes_for_live_hover_drawing(self.transform.clone(), pointer);
+            shapes.append(&mut new_shapres);
             self.hover(ui, pointer, &mut shapes)
         } else {
             Vec::new()
