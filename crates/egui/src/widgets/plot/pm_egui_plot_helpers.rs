@@ -1,6 +1,6 @@
 use std::sync::{Arc, RwLock};
 use epaint::{Vec2, Pos2, Shape, Stroke, Color32};
-use pm_pattern_logic::{NotificationHandler, PatternPos, Pattern, PatternElement, CurrentDrawingTool, SelectedElements, ToolKind, get_selected_items_length, AxisKind, ViewSettings};
+use pm_pattern_logic::{NotificationHandler, PatternPos, Pattern, PatternElement, CurrentDrawingTool, SelectedElements, ToolKind, get_selected_items_length, AxisKind, set_render_to_index};
 
 use crate::Response;
 
@@ -8,7 +8,6 @@ use super::{ScreenTransform, PlotPoint};
 
 
 pub struct PmEguiPlotHelpers {
-    pub view_settings : Arc<RwLock<ViewSettings>>, 
     pub pattern : Arc<RwLock<Pattern>>, 
     pub drawing_tool : Arc<RwLock<CurrentDrawingTool>>, 
     pub selected_items : Arc<RwLock<SelectedElements>>, 
@@ -28,7 +27,6 @@ impl std::fmt::Debug for PmEguiPlotHelpers {
 impl Default for PmEguiPlotHelpers {
     fn default() -> Self {
         Self {
-            view_settings : Arc::new(RwLock::new(ViewSettings::default())),
             pattern :  Arc::new(RwLock::new(Pattern::default())),
             drawing_tool : Arc::new(RwLock::new(CurrentDrawingTool::default())),
             selected_items : Arc::new(RwLock::new(SelectedElements::default())),
@@ -42,7 +40,7 @@ impl Default for PmEguiPlotHelpers {
 }
 
 impl PmEguiPlotHelpers{
-    pub fn new(view_settings : Arc<RwLock<ViewSettings>>, 
+    pub fn new(
         pattern : Arc<RwLock<Pattern>>, 
         drawing_tool : Arc<RwLock<CurrentDrawingTool>>, 
         selected_items : Arc<RwLock<SelectedElements>>, 
@@ -52,7 +50,6 @@ impl PmEguiPlotHelpers{
         pattern_measurement_colour: Color32,
         pattern_line_stroke_width: f32,) -> Self {
         Self {
-            view_settings,
             pattern,
             drawing_tool,
             selected_items,
@@ -109,9 +106,7 @@ impl PmEguiPlotHelpers{
         if response.drag_started(){ // && response.drag_delta().length() > RESPONSE_DRAG_DELTA_DETECTION_LIMIT{
             //test there is a click position
             if let Some(pointer_pos) = response.interact_pointer_pos() {
-                let view_settnig_clone = Arc::clone(&self.view_settings);
-                let mut unlocked_view_settings = view_settnig_clone.write().unwrap();
-                let render_to_index = unlocked_view_settings.render_to_index.clone();
+                let render_to_index = self.pattern.read().unwrap().render_to_index.clone();
                 let position_value_from_position = last_screen_transform.value_from_position(pointer_pos);
                 let drag_pattern_pos = PatternPos{x: position_value_from_position.x, y: position_value_from_position.y};
                 let mut closest_element: Option<Box<dyn PatternElement>> = None;
@@ -139,8 +134,7 @@ impl PmEguiPlotHelpers{
                         (self.js_helpers.read().unwrap().alert_function)(&*some_error.to_string());
                     }
                 }
-                unlocked_view_settings.set_render_to_index(0);
-                drop(unlocked_view_settings);
+                set_render_to_index(&self.pattern, render_to_index);
             } 
         }
     }
@@ -168,11 +162,11 @@ impl PmEguiPlotHelpers{
                         //debug!("lpc - testing 6");
                         if drag_ids.len() > 0{
                             //debug!("lpc - testing 7");
-                            let render_to_index = self.view_settings.read().unwrap().render_to_index.clone();
+                            let render_to_index = self.pattern.read().unwrap().render_to_index.clone();
                             //debug!("lpc - testing 8");
                             self.pattern.write().unwrap().move_points_by_drag(drag_ids, Self::transform_plot_point_to_pattern_pos(PlotPoint::new(tranformed_delta.x, tranformed_delta.y)), render_to_index);
                             //debug!("lpc - testing 9");
-                            self.view_settings.write().unwrap().set_render_to_index(0);
+                            set_render_to_index(&self.pattern, render_to_index);
                         }
                         return true;
                     }else{
