@@ -109,6 +109,8 @@ impl PmEguiPlotHelpers{
                 let render_to_index = self.pattern.read().unwrap().render_to_index.clone();
                 let position_value_from_position = last_screen_transform.value_from_position(pointer_pos);
                 let drag_pattern_pos = PatternPos{x: position_value_from_position.x, y: position_value_from_position.y};
+                
+                xxx
                 let mut closest_element: Option<Box<dyn PatternElement>> = None;
                 
                 if let Ok(the_elements) = self.pattern.read().unwrap().get_all_pattern_elements(){
