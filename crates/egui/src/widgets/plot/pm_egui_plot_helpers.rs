@@ -1,6 +1,6 @@
 use std::sync::{Arc, RwLock};
 use epaint::{Vec2, Pos2, Shape, Stroke, Color32};
-use pm_pattern_logic::{NotificationHandler, PatternPos, Pattern, PatternElement, CurrentDrawingTool, SelectedElements, ToolKind, get_selected_items_length, AxisKind, set_render_to_index};
+use pm_pattern_logic::{NotificationHandler, PatternPos, Pattern, PatternElement, CurrentDrawingTool, SelectedElements, ToolKind, get_selected_items_length, AxisKind, set_render_to_index, SelectionModeKind};
 
 use crate::Response;
 
@@ -110,33 +110,54 @@ impl PmEguiPlotHelpers{
                 let position_value_from_position = last_screen_transform.value_from_position(pointer_pos);
                 let drag_pattern_pos = PatternPos{x: position_value_from_position.x, y: position_value_from_position.y};
                 
-                xxx
-                let mut closest_element: Option<Box<dyn PatternElement>> = None;
-                
-                if let Ok(the_elements) = self.pattern.read().unwrap().get_all_pattern_elements(){
-                    //see if there is a closest point
-                    if let Some(element) = self.pattern.read().unwrap().get_closest_point_element(the_elements.clone(), drag_pattern_pos, last_screen_transform.bounds().min(), last_screen_transform.bounds().max()){
-                        closest_element = Some(element.clone());
-                        
-                    }else{
-                        //see if there is a closest other element that's not a point. 
-                        if let Some(element) = self.pattern.read().unwrap().get_closest_non_point_element(the_elements, drag_pattern_pos, last_screen_transform.bounds().min(), last_screen_transform.bounds().max()){
-                            closest_element = Some(element.clone());
+                let select_mode = self.drawing_tool.read().unwrap().get_select_mode();
+                if select_mode == SelectionModeKind::Piece {
+                    let selected_piece_option = self.pattern.read().unwrap().get_piece_from_position(drag_pattern_pos); 
+                    if let Some(selected_piece) = selected_piece_option{
+                        if let Err(some_error) = self.drawing_tool.read().unwrap().get_current_tool().piece_selected(drag_pattern_pos, Arc::clone(&self.pattern), Arc::clone(&self.selected_items), selected_piece, render_to_index){
+                            //debug!("lpc - in helper click handling - handling error");
+                            (self.js_helpers.read().unwrap().alert_function)(&*some_error.to_string());
                         }
                     }
-                }
-
-                if let Some(element) = closest_element{
-                    if let Err(some_error) = self.drawing_tool.read().unwrap().get_current_tool().item_selected(drag_pattern_pos, Arc::clone(&self.pattern), Arc::clone(&self.selected_items), element, render_to_index){
-                        (self.js_helpers.read().unwrap().alert_function)(&*some_error.to_string());
+                }else if select_mode == SelectionModeKind::LayoutPiece{
+                    //let selected_layout = 
+                    let selected_piece_option = self.pattern.read().unwrap().get_layout_piece_from_position(drag_pattern_pos, self.selected_items.read().unwrap().get_print_layout().clone()); 
+                    if let Some(selected_piece) = selected_piece_option{
+                        if let Err(some_error) = self.drawing_tool.read().unwrap().get_current_tool().piece_selected(drag_pattern_pos, Arc::clone(&self.pattern), Arc::clone(&self.selected_items), selected_piece, render_to_index){
+                            //debug!("lpc - in helper click handling - handling error");
+                            (self.js_helpers.read().unwrap().alert_function)(&*some_error.to_string());
+                        }
                     }
                 }else{
-                    if let Err(some_error) = self.drawing_tool.read().unwrap().get_current_tool().click_no_selection(drag_pattern_pos, Arc::clone(&self.pattern), Arc::clone(&self.selected_items), render_to_index){
-                        //debug!("lpc - in helper click handling - handling error");
-                        (self.js_helpers.read().unwrap().alert_function)(&*some_error.to_string());
+                    //let mut selected_piece_option : Option<Uuid> = None;
+                    let mut closest_element: Option<Box<dyn PatternElement>> = None;
+                
+                    if let Ok(the_elements) = self.pattern.read().unwrap().get_all_pattern_elements(){
+                        //see if there is a closest point
+                        if let Some(element) = self.pattern.read().unwrap().get_closest_point_element(the_elements.clone(), drag_pattern_pos, last_screen_transform.bounds().min(), last_screen_transform.bounds().max()){
+                            closest_element = Some(element.clone());
+                            
+                        }else{
+                            //see if there is a closest other element that's not a point. 
+                            if let Some(element) = self.pattern.read().unwrap().get_closest_non_point_element(the_elements, drag_pattern_pos, last_screen_transform.bounds().min(), last_screen_transform.bounds().max()){
+                                closest_element = Some(element.clone());
+                            }
+                        }
                     }
+    
+                    if let Some(element) = closest_element{
+                        if let Err(some_error) = self.drawing_tool.read().unwrap().get_current_tool().item_selected(drag_pattern_pos, Arc::clone(&self.pattern), Arc::clone(&self.selected_items), element, render_to_index){
+                            (self.js_helpers.read().unwrap().alert_function)(&*some_error.to_string());
+                        }
+                    }else{
+                        if let Err(some_error) = self.drawing_tool.read().unwrap().get_current_tool().click_no_selection(drag_pattern_pos, Arc::clone(&self.pattern), Arc::clone(&self.selected_items), render_to_index){
+                            //debug!("lpc - in helper click handling - handling error");
+                            (self.js_helpers.read().unwrap().alert_function)(&*some_error.to_string());
+                        }
+                    }
+                    set_render_to_index(&self.pattern, render_to_index);
                 }
-                set_render_to_index(&self.pattern, render_to_index);
+                
             } 
         }
     }
