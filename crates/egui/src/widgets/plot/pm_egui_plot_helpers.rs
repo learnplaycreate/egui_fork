@@ -187,7 +187,8 @@ impl PmEguiPlotHelpers{
                             //debug!("lpc - testing 7");
                             let render_to_index = self.pattern.read().unwrap().render_to_index.clone();
                             //debug!("lpc - testing 8");
-                            self.pattern.write().unwrap().move_points_by_drag(drag_ids, Self::transform_plot_point_to_pattern_pos(PlotPoint::new(tranformed_delta.x, tranformed_delta.y)), render_to_index);
+                            self.drawing_tool.read().unwrap().get_current_tool().do_drag_action(&self.pattern, drag_ids, Self::transform_plot_point_to_pattern_pos(PlotPoint::new(tranformed_delta.x, tranformed_delta.y)), render_to_index);
+                            //self.pattern.write().unwrap().move_points_by_drag(drag_ids, Self::transform_plot_point_to_pattern_pos(PlotPoint::new(tranformed_delta.x, tranformed_delta.y)), render_to_index);
                             //debug!("lpc - testing 9");
                             set_render_to_index(&self.pattern, render_to_index);
                         }
