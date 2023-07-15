@@ -102,8 +102,7 @@ impl PmEguiPlotHelpers{
         last_screen_transform : ScreenTransform
     )
     {
-        //debug!("lpc - in helper click handling");
-        if response.drag_started(){ // && response.drag_delta().length() > RESPONSE_DRAG_DELTA_DETECTION_LIMIT{
+        if response.drag_started(){ 
             //test there is a click position
             if let Some(pointer_pos) = response.interact_pointer_pos() {
                 let render_to_index = self.pattern.read().unwrap().render_to_index.clone();
@@ -115,16 +114,15 @@ impl PmEguiPlotHelpers{
                     let selected_piece_option = self.pattern.read().unwrap().get_piece_from_position(drag_pattern_pos); 
                     if let Some(selected_piece) = selected_piece_option{
                         if let Err(some_error) = self.drawing_tool.read().unwrap().get_current_tool().piece_selected(drag_pattern_pos, Arc::clone(&self.pattern), Arc::clone(&self.selected_items), selected_piece, render_to_index){
-                            //debug!("lpc - in helper click handling - handling error");
+                            //todo - lpc, pass this to the the error handler
                             (self.platform_integration_methods.read().unwrap().alert_function)(&*some_error.to_string());
                         }
                     }
                 }else if select_mode == SelectionModeKind::LayoutPiece{
-                    //let selected_layout = 
                     let selected_piece_option = self.pattern.read().unwrap().get_layout_piece_from_position(drag_pattern_pos, self.selected_items.read().unwrap().get_print_layout().clone()); 
                     if let Some(selected_piece) = selected_piece_option{
                         if let Err(some_error) = self.drawing_tool.read().unwrap().get_current_tool().piece_selected(drag_pattern_pos, Arc::clone(&self.pattern), Arc::clone(&self.selected_items), selected_piece, render_to_index){
-                            //debug!("lpc - in helper click handling - handling error");
+                            //todo - lpc, pass this to the the error handler
                             (self.platform_integration_methods.read().unwrap().alert_function)(&*some_error.to_string());
                         }
                     }
@@ -147,11 +145,12 @@ impl PmEguiPlotHelpers{
     
                     if let Some(element) = closest_element{
                         if let Err(some_error) = self.drawing_tool.read().unwrap().get_current_tool().item_selected(drag_pattern_pos, Arc::clone(&self.pattern), Arc::clone(&self.selected_items), element, render_to_index){
+                            //todo - lpc, pass this to the the error handler
                             (self.platform_integration_methods.read().unwrap().alert_function)(&*some_error.to_string());
                         }
                     }else{
                         if let Err(some_error) = self.drawing_tool.read().unwrap().get_current_tool().click_no_selection(drag_pattern_pos, Arc::clone(&self.pattern), Arc::clone(&self.selected_items), render_to_index){
-                            //debug!("lpc - in helper click handling - handling error");
+                            //todo - lpc, pass this to the the error handler
                             (self.platform_integration_methods.read().unwrap().alert_function)(&*some_error.to_string());
                         }
                     }
@@ -168,29 +167,18 @@ impl PmEguiPlotHelpers{
         last_screen_transform : ScreenTransform, 
     ) -> bool{
         //todo lpc this currently has a limit of 1 and I'm not even sure it's doing anyting, should test to find the limt that stops code running when it's not required. 
-        
-        //todo lpc this currently has a limit of 1 and I'm not even sure it's doing anyting, should test to find the limt that stops code running when it's not required. 
         if response.drag_delta().length() > self.response_drag_delta_detection_limit{
-            //debug!("lpc - in helper drag handling");
             let delta = response.drag_delta(); 
-            //debug!("lpc - testing 2");
             let tranformed_delta = Self::translate_pos_drag(&last_screen_transform, delta);
-            //debug!("lpc - testing 3");
             let drag_ids_option_response =  self.drawing_tool.read().unwrap().get_current_tool().get_draggable_items(Arc::clone(&self.pattern), Arc::clone(&self.selected_items));
-            //debug!("lpc - testing 4");
             match drag_ids_option_response{
                 Ok(drag_ids_option) => {
-                    //debug!("lpc - testing 5");
                     if let Some(drag_ids) = drag_ids_option{
-                        //debug!("lpc - testing 6");
                         if drag_ids.len() > 0{
-                            //debug!("lpc - testing 7");
                             let render_to_index = self.pattern.read().unwrap().render_to_index.clone();
-                            //debug!("lpc - testing 8");
-                            self.drawing_tool.read().unwrap().get_current_tool().do_drag_action(&self.pattern, &self.selected_items, drag_ids, Self::transform_plot_point_to_pattern_pos(PlotPoint::new(tranformed_delta.x, tranformed_delta.y)), render_to_index);
-                            //self.pattern.write().unwrap().move_points_by_drag(drag_ids, Self::transform_plot_point_to_pattern_pos(PlotPoint::new(tranformed_delta.x, tranformed_delta.y)), render_to_index);
-                            //debug!("lpc - testing 9");
-                            //set_render_to_index(&self.pattern, render_to_index);
+                            if let Err(_) = self.drawing_tool.read().unwrap().get_current_tool().do_drag_action(&self.pattern, &self.selected_items, drag_ids, Self::transform_plot_point_to_pattern_pos(PlotPoint::new(tranformed_delta.x, tranformed_delta.y)), render_to_index){
+                                //todo - lpc, pass this to the the error handler
+                            }
                         }
                         return true;
                     }else{
