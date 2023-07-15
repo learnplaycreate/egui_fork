@@ -1,6 +1,6 @@
 use std::sync::{Arc, RwLock};
 use epaint::{Vec2, Pos2, Shape, Stroke, Color32};
-use pm_pattern_logic::{NotificationHandler, PatternPos, Pattern, PatternElement, CurrentDrawingTool, SelectedElements, ToolKind, get_selected_items_length, AxisKind, set_render_to_index, SelectionModeKind};
+use pm_pattern_logic::{PlatformIntegrationMethods, PatternPos, Pattern, PatternElement, CurrentDrawingTool, SelectedElements, ToolKind, AxisKind, set_render_to_index, SelectionModeKind};
 
 use crate::Response;
 
@@ -11,7 +11,7 @@ pub struct PmEguiPlotHelpers {
     pub pattern : Arc<RwLock<Pattern>>, 
     pub drawing_tool : Arc<RwLock<CurrentDrawingTool>>, 
     pub selected_items : Arc<RwLock<SelectedElements>>, 
-    pub js_helpers : Arc<RwLock<NotificationHandler>>,
+    pub platform_integration_methods : Arc<RwLock<PlatformIntegrationMethods>>,
     response_drag_delta_detection_limit : f32, // RESPONSE_DRAG_DELTA_DETECTION_LIMIT
     pattern_drawing_live_colour: Color32,
     pattern_measurement_colour: Color32,
@@ -30,7 +30,7 @@ impl Default for PmEguiPlotHelpers {
             pattern :  Arc::new(RwLock::new(Pattern::default())),
             drawing_tool : Arc::new(RwLock::new(CurrentDrawingTool::default())),
             selected_items : Arc::new(RwLock::new(SelectedElements::default())),
-            js_helpers : Arc::new(RwLock::new(NotificationHandler::default())),
+            platform_integration_methods : Arc::new(RwLock::new(PlatformIntegrationMethods::default())),
             response_drag_delta_detection_limit: 0.0,
             pattern_drawing_live_colour: Color32::GREEN,
             pattern_measurement_colour: Color32::GRAY,
@@ -44,7 +44,7 @@ impl PmEguiPlotHelpers{
         pattern : Arc<RwLock<Pattern>>, 
         drawing_tool : Arc<RwLock<CurrentDrawingTool>>, 
         selected_items : Arc<RwLock<SelectedElements>>, 
-        js_helpers : Arc<RwLock<NotificationHandler>>,
+        platform_integration_methods : Arc<RwLock<PlatformIntegrationMethods>>,
         response_drag_delta_detection_limit : f32, // RESPONSE_DRAG_DELTA_DETECTION_LIMIT
         pattern_drawing_live_colour: Color32,
         pattern_measurement_colour: Color32,
@@ -53,7 +53,7 @@ impl PmEguiPlotHelpers{
             pattern,
             drawing_tool,
             selected_items,
-            js_helpers,
+            platform_integration_methods,
             response_drag_delta_detection_limit, // RESPONSE_DRAG_DELTA_DETECTION_LIMIT
             pattern_drawing_live_colour,
             pattern_measurement_colour,
@@ -116,7 +116,7 @@ impl PmEguiPlotHelpers{
                     if let Some(selected_piece) = selected_piece_option{
                         if let Err(some_error) = self.drawing_tool.read().unwrap().get_current_tool().piece_selected(drag_pattern_pos, Arc::clone(&self.pattern), Arc::clone(&self.selected_items), selected_piece, render_to_index){
                             //debug!("lpc - in helper click handling - handling error");
-                            (self.js_helpers.read().unwrap().alert_function)(&*some_error.to_string());
+                            (self.platform_integration_methods.read().unwrap().alert_function)(&*some_error.to_string());
                         }
                     }
                 }else if select_mode == SelectionModeKind::LayoutPiece{
@@ -125,7 +125,7 @@ impl PmEguiPlotHelpers{
                     if let Some(selected_piece) = selected_piece_option{
                         if let Err(some_error) = self.drawing_tool.read().unwrap().get_current_tool().piece_selected(drag_pattern_pos, Arc::clone(&self.pattern), Arc::clone(&self.selected_items), selected_piece, render_to_index){
                             //debug!("lpc - in helper click handling - handling error");
-                            (self.js_helpers.read().unwrap().alert_function)(&*some_error.to_string());
+                            (self.platform_integration_methods.read().unwrap().alert_function)(&*some_error.to_string());
                         }
                     }
                 }else{
@@ -147,12 +147,12 @@ impl PmEguiPlotHelpers{
     
                     if let Some(element) = closest_element{
                         if let Err(some_error) = self.drawing_tool.read().unwrap().get_current_tool().item_selected(drag_pattern_pos, Arc::clone(&self.pattern), Arc::clone(&self.selected_items), element, render_to_index){
-                            (self.js_helpers.read().unwrap().alert_function)(&*some_error.to_string());
+                            (self.platform_integration_methods.read().unwrap().alert_function)(&*some_error.to_string());
                         }
                     }else{
                         if let Err(some_error) = self.drawing_tool.read().unwrap().get_current_tool().click_no_selection(drag_pattern_pos, Arc::clone(&self.pattern), Arc::clone(&self.selected_items), render_to_index){
                             //debug!("lpc - in helper click handling - handling error");
-                            (self.js_helpers.read().unwrap().alert_function)(&*some_error.to_string());
+                            (self.platform_integration_methods.read().unwrap().alert_function)(&*some_error.to_string());
                         }
                     }
                     set_render_to_index(&self.pattern, render_to_index);
@@ -198,7 +198,7 @@ impl PmEguiPlotHelpers{
                     }
                 }
                 Err(error) => {
-                    (self.js_helpers.read().unwrap().alert_function)(&error.to_string());
+                    (self.platform_integration_methods.read().unwrap().alert_function)(&error.to_string());
                     return true;
                 }
             }
@@ -217,7 +217,7 @@ impl PmEguiPlotHelpers{
         match self.drawing_tool.read().unwrap().get_current_tool().get_drawing_tool_kind(){
             ToolKind::Curve(_) |
             ToolKind::Dart => {
-                if get_selected_items_length(&self.selected_items) == 1 {
+                if self.selected_items.read().unwrap().get_items().len() == 1 {
                     if let Ok(returned_live_shape_option) = self.drawing_tool.read().unwrap().get_current_tool().get_live_drawing_position(Self::transform_plot_point_to_pattern_pos(transform.value_from_position(pointer)), Arc::clone(&self.pattern), Arc::clone(&self.selected_items)){
                         if let Some(returned_points) = returned_live_shape_option{
                             if returned_points.len() == 2{
