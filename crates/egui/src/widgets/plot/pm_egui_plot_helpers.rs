@@ -1,18 +1,25 @@
 use std::sync::{Arc, RwLock};
 use epaint::{Vec2, Pos2, Shape, Stroke, Color32};
-use pm_pattern_logic::{PlatformIntegrationMethods, PatternPos, Pattern, PatternElement, CurrentDrawingTool, SelectedElements, ToolKind, AxisKind, set_render_to_index, SelectionModeKind, pm_alert};
-
+use pm_pattern_logic::{
+    PatternPos, 
+    Pattern, 
+    PatternElement, 
+    CurrentDrawingTool, 
+    SelectedElements, 
+    ToolKind, 
+    AxisKind, 
+    SelectionModeKind, 
+    set_render_to_index, 
+    handle_pm_error
+};
 use crate::Response;
-
 use super::{ScreenTransform, PlotPoint};
-
 
 pub struct PmEguiPlotHelpers {
     pub pattern : Arc<RwLock<Pattern>>, 
     pub drawing_tool : Arc<RwLock<CurrentDrawingTool>>, 
     pub selected_items : Arc<RwLock<SelectedElements>>, 
-    //pub platform_integration_methods : Arc<PlatformIntegrationMethods>,
-    response_drag_delta_detection_limit : f32, // RESPONSE_DRAG_DELTA_DETECTION_LIMIT
+    response_drag_delta_detection_limit : f32, 
     pattern_drawing_live_colour: Color32,
     pattern_measurement_colour: Color32,
     pattern_line_stroke_width: f32,
@@ -114,24 +121,19 @@ impl PmEguiPlotHelpers{
                     let selected_piece_option = self.pattern.read().unwrap().get_piece_from_position(drag_pattern_pos); 
                     if let Some(selected_piece) = selected_piece_option{
                         if let Err(some_error) = self.drawing_tool.read().unwrap().get_current_tool().piece_selected(drag_pattern_pos, Arc::clone(&self.pattern), Arc::clone(&self.selected_items), selected_piece, render_to_index){
-                            //todo - lpc, pass this to the the error handler
-                            pm_alert(&*some_error.to_string());
-                            //(self.platform_integration_methods.alert_function)(&*some_error.to_string());
+                            handle_pm_error(&some_error, Some(&self.pattern));
                         }
                     }
                 }else if select_mode == SelectionModeKind::LayoutPiece{
                     let selected_piece_option = self.pattern.read().unwrap().get_layout_piece_from_position(drag_pattern_pos, self.selected_items.read().unwrap().get_print_layout().clone()); 
                     if let Some(selected_piece) = selected_piece_option{
                         if let Err(some_error) = self.drawing_tool.read().unwrap().get_current_tool().piece_selected(drag_pattern_pos, Arc::clone(&self.pattern), Arc::clone(&self.selected_items), selected_piece, render_to_index){
-                            //todo - lpc, pass this to the the error handler
-                            pm_alert(&*some_error.to_string());
-                            //(self.platform_integration_methods.alert_function)(&*some_error.to_string());
+                            handle_pm_error(&some_error, Some(&self.pattern));
                         }
                     }
                 }else{
                     //let mut selected_piece_option : Option<Uuid> = None;
                     let mut closest_element: Option<Box<dyn PatternElement>> = None;
-                
                     if let Ok(the_elements) = self.pattern.read().unwrap().get_all_pattern_elements(){
                         //see if there is a closest point
                         if let Some(element) = self.pattern.read().unwrap().get_closest_point_element(the_elements.clone(), drag_pattern_pos, last_screen_transform.bounds().min(), last_screen_transform.bounds().max()){
@@ -144,23 +146,17 @@ impl PmEguiPlotHelpers{
                             }
                         }
                     }
-    
                     if let Some(element) = closest_element{
                         if let Err(some_error) = self.drawing_tool.read().unwrap().get_current_tool().item_selected(drag_pattern_pos, Arc::clone(&self.pattern), Arc::clone(&self.selected_items), element, render_to_index){
-                            //todo - lpc, pass this to the the error handler
-                            pm_alert(&*some_error.to_string());
-                            //(self.platform_integration_methods.alert_function)(&*some_error.to_string());
+                            handle_pm_error(&some_error, Some(&self.pattern));
                         }
                     }else{
                         if let Err(some_error) = self.drawing_tool.read().unwrap().get_current_tool().click_no_selection(drag_pattern_pos, Arc::clone(&self.pattern), Arc::clone(&self.selected_items), render_to_index){
-                            //todo - lpc, pass this to the the error handler
-                            pm_alert(&*some_error.to_string());
-                            //(self.platform_integration_methods.alert_function)(&*some_error.to_string());
+                            handle_pm_error(&some_error, Some(&self.pattern));
                         }
                     }
                     set_render_to_index(&self.pattern, render_to_index);
                 }
-                
             } 
         }
     }
@@ -180,8 +176,8 @@ impl PmEguiPlotHelpers{
                     if let Some(drag_ids) = drag_ids_option{
                         if drag_ids.len() > 0{
                             let render_to_index = self.pattern.read().unwrap().render_to_index.clone();
-                            if let Err(_) = self.drawing_tool.read().unwrap().get_current_tool().do_drag_action(&self.pattern, &self.selected_items, drag_ids, Self::transform_plot_point_to_pattern_pos(PlotPoint::new(tranformed_delta.x, tranformed_delta.y)), render_to_index){
-                                //todo - lpc, pass this to the the error handler
+                            if let Err(e) = self.drawing_tool.read().unwrap().get_current_tool().do_drag_action(&self.pattern, &self.selected_items, drag_ids, Self::transform_plot_point_to_pattern_pos(PlotPoint::new(tranformed_delta.x, tranformed_delta.y)), render_to_index){
+                                handle_pm_error(&e, Some(&self.pattern))
                             }
                         }
                         return true;
@@ -190,8 +186,7 @@ impl PmEguiPlotHelpers{
                     }
                 }
                 Err(error) => {
-                    pm_alert(&*error.to_string());
-                    //(self.platform_integration_methods.alert_function)(&error.to_string());
+                    handle_pm_error(&error, Some(&self.pattern));
                     return true;
                 }
             }
@@ -228,7 +223,6 @@ impl PmEguiPlotHelpers{
                         if returned_points.len() == 1{
                             let start_point : Pos2;
                             let end_point : Pos2;
-                            
                             match axis_kind{
                                 AxisKind::Horizontal => {
                                     start_point = transform.position_from_point(&PlotPoint::new(transform.bounds().min()[0], returned_points[0].y));
@@ -262,7 +256,6 @@ impl PmEguiPlotHelpers{
         }
         return shapes;
     }
-    
 }
 
 
