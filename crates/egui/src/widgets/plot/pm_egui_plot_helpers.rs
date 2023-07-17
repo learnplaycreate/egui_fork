@@ -233,7 +233,8 @@ impl PmEguiPlotHelpers{
                                     end_point = transform.position_from_point(&PlotPoint::new(returned_points[0].x, transform.bounds().max()[1]));
                                 }
                                 AxisKind::Both => {
-                                    panic!("this shouldn't happen ln214")
+                                    //need to leave this as a panic, so we don't need to import the Log::Levels
+                                    panic!("Guide line has AxisKind::both, this shouldn't happen 236")
                                 }
                             }
                     
