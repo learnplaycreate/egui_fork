@@ -120,16 +120,12 @@ impl PmEguiPlotHelpers{
                 if select_mode == SelectionModeKind::Piece {
                     let selected_piece_option = self.pattern.read().unwrap().get_piece_from_position(drag_pattern_pos); 
                     if let Some(selected_piece) = selected_piece_option{
-                        if let Err(some_error) = self.drawing_tool.read().unwrap().get_current_tool().piece_selected(drag_pattern_pos, Arc::clone(&self.pattern), Arc::clone(&self.selected_items), selected_piece, render_to_index){
-                            handle_pm_error(&some_error, Some(&self.pattern));
-                        }
+                        self.drawing_tool.read().unwrap().get_current_tool().tool_action_piece_selected(drag_pattern_pos, Arc::clone(&self.pattern), Arc::clone(&self.selected_items), selected_piece, render_to_index);
                     }
                 }else if select_mode == SelectionModeKind::LayoutPiece{
                     let selected_piece_option = self.pattern.read().unwrap().get_layout_piece_from_position(drag_pattern_pos, self.selected_items.read().unwrap().get_print_layout().clone()); 
                     if let Some(selected_piece) = selected_piece_option{
-                        if let Err(some_error) = self.drawing_tool.read().unwrap().get_current_tool().piece_selected(drag_pattern_pos, Arc::clone(&self.pattern), Arc::clone(&self.selected_items), selected_piece, render_to_index){
-                            handle_pm_error(&some_error, Some(&self.pattern));
-                        }
+                        self.drawing_tool.read().unwrap().get_current_tool().tool_action_piece_selected(drag_pattern_pos, Arc::clone(&self.pattern), Arc::clone(&self.selected_items), selected_piece, render_to_index);
                     }
                 }else{
                     //let mut selected_piece_option : Option<Uuid> = None;
@@ -147,13 +143,9 @@ impl PmEguiPlotHelpers{
                         }
                     }
                     if let Some(element) = closest_element{
-                        if let Err(some_error) = self.drawing_tool.read().unwrap().get_current_tool().item_selected(drag_pattern_pos, Arc::clone(&self.pattern), Arc::clone(&self.selected_items), element, render_to_index){
-                            handle_pm_error(&some_error, Some(&self.pattern));
-                        }
+                        self.drawing_tool.read().unwrap().get_current_tool().tool_action_item_selected(drag_pattern_pos, Arc::clone(&self.pattern), Arc::clone(&self.selected_items), element, render_to_index);
                     }else{
-                        if let Err(some_error) = self.drawing_tool.read().unwrap().get_current_tool().click_no_selection(drag_pattern_pos, Arc::clone(&self.pattern), Arc::clone(&self.selected_items), render_to_index){
-                            handle_pm_error(&some_error, Some(&self.pattern));
-                        }
+                        self.drawing_tool.read().unwrap().get_current_tool().tool_action_no_item_selected(drag_pattern_pos, Arc::clone(&self.pattern), Arc::clone(&self.selected_items), render_to_index);
                     }
                     set_render_to_index(&self.pattern, render_to_index);
                 }
@@ -170,25 +162,15 @@ impl PmEguiPlotHelpers{
         if response.drag_delta().length() > self.response_drag_delta_detection_limit{
             let delta = response.drag_delta(); 
             let tranformed_delta = Self::translate_pos_drag(&last_screen_transform, delta);
-            let drag_ids_option_response =  self.drawing_tool.read().unwrap().get_current_tool().get_draggable_items(Arc::clone(&self.pattern), Arc::clone(&self.selected_items));
-            match drag_ids_option_response{
-                Ok(drag_ids_option) => {
-                    if let Some(drag_ids) = drag_ids_option{
-                        if drag_ids.len() > 0{
-                            let render_to_index = self.pattern.read().unwrap().render_to_index.clone();
-                            if let Err(e) = self.drawing_tool.read().unwrap().get_current_tool().do_drag_action(&self.pattern, &self.selected_items, drag_ids, Self::transform_plot_point_to_pattern_pos(PlotPoint::new(tranformed_delta.x, tranformed_delta.y)), render_to_index){
-                                handle_pm_error(&e, Some(&self.pattern))
-                            }
-                        }
-                        return true;
-                    }else{
-                        return false;
-                    }
+            let drag_ids_option =  self.drawing_tool.read().unwrap().get_current_tool().get_draggable_items(Arc::clone(&self.pattern), Arc::clone(&self.selected_items));
+            if let Some(drag_ids) = drag_ids_option{
+                if drag_ids.len() > 0{
+                    let render_to_index = self.pattern.read().unwrap().render_to_index.clone();
+                    self.drawing_tool.read().unwrap().get_current_tool().tool_action_drag_action(&self.pattern, &self.selected_items, drag_ids, Self::transform_plot_point_to_pattern_pos(PlotPoint::new(tranformed_delta.x, tranformed_delta.y)), render_to_index);
                 }
-                Err(error) => {
-                    handle_pm_error(&error, Some(&self.pattern));
-                    return true;
-                }
+                return true;
+            }else{
+                return false;
             }
         }else{
             return false;
@@ -206,47 +188,46 @@ impl PmEguiPlotHelpers{
             ToolKind::Curve(_) |
             ToolKind::Dart => {
                 if self.selected_items.read().unwrap().get_items().len() == 1 {
-                    if let Ok(returned_live_shape_option) = self.drawing_tool.read().unwrap().get_current_tool().get_live_drawing_position(Self::transform_plot_point_to_pattern_pos(transform.value_from_position(pointer)), Arc::clone(&self.pattern), Arc::clone(&self.selected_items)){
-                        if let Some(returned_points) = returned_live_shape_option{
-                            if returned_points.len() == 2{
-                                let line = Shape::line(vec![transform.position_from_point(&Self::transform_pattern_pos_to_plot_point(returned_points[0])) , transform.position_from_point(&Self::transform_pattern_pos_to_plot_point(returned_points[1]))], Stroke::new(self.pattern_line_stroke_width, self.pattern_drawing_live_colour));
-                                shapes.push(line);
-                            }
+                    let returned_live_shape_option= self.drawing_tool.read().unwrap().get_current_tool().get_live_drawing_position(Self::transform_plot_point_to_pattern_pos(transform.value_from_position(pointer)), Arc::clone(&self.pattern), Arc::clone(&self.selected_items));
+                    if let Some(returned_points) = returned_live_shape_option{
+                        if returned_points.len() == 2{
+                            let line = Shape::line(vec![transform.position_from_point(&Self::transform_pattern_pos_to_plot_point(returned_points[0])) , transform.position_from_point(&Self::transform_pattern_pos_to_plot_point(returned_points[1]))], Stroke::new(self.pattern_line_stroke_width, self.pattern_drawing_live_colour));
+                            shapes.push(line);
                         }
                     }
                 }
             }
             //todo - lpc this is not working. 
             ToolKind::GuideLine(axis_kind) => { 
-                if let Ok(returned_live_shape_option) = self.drawing_tool.read().unwrap().get_current_tool().get_live_drawing_position(Self::transform_plot_point_to_pattern_pos(transform.value_from_position(pointer)), Arc::clone(&self.pattern), Arc::clone(&self.selected_items)){
-                    if let Some(returned_points) = returned_live_shape_option{
-                        if returned_points.len() == 1{
-                            let start_point : Pos2;
-                            let end_point : Pos2;
-                            match axis_kind{
-                                AxisKind::Horizontal => {
-                                    start_point = transform.position_from_point(&PlotPoint::new(transform.bounds().min()[0], returned_points[0].y));
-                                    end_point = transform.position_from_point(&PlotPoint::new(transform.bounds().max()[0], returned_points[0].y));
-                                }
-                                AxisKind::Vertical => {
-                                    start_point = transform.position_from_point(&PlotPoint::new(returned_points[0].x, transform.bounds().min()[1]));
-                                    end_point = transform.position_from_point(&PlotPoint::new(returned_points[0].x, transform.bounds().max()[1]));
-                                }
-                                AxisKind::Both => {
-                                    //need to leave this as a panic, so we don't need to import the Log::Levels
-                                    panic!("Guide line has AxisKind::both, this shouldn't happen 236")
-                                }
+                let returned_live_shape_option = self.drawing_tool.read().unwrap().get_current_tool().get_live_drawing_position(Self::transform_plot_point_to_pattern_pos(transform.value_from_position(pointer)), Arc::clone(&self.pattern), Arc::clone(&self.selected_items));
+                if let Some(returned_points) = returned_live_shape_option{
+                    if returned_points.len() == 1{
+                        let start_point : Pos2;
+                        let end_point : Pos2;
+                        match axis_kind{
+                            AxisKind::Horizontal => {
+                                start_point = transform.position_from_point(&PlotPoint::new(transform.bounds().min()[0], returned_points[0].y));
+                                end_point = transform.position_from_point(&PlotPoint::new(transform.bounds().max()[0], returned_points[0].y));
                             }
-                    
-                            let points = vec![
-                                    start_point,
-                                    end_point
-                                ];
-                            let line = Shape::line(points,Stroke::new(self.pattern_line_stroke_width/2.0,self.pattern_measurement_colour));
-                            shapes.push(line);
+                            AxisKind::Vertical => {
+                                start_point = transform.position_from_point(&PlotPoint::new(returned_points[0].x, transform.bounds().min()[1]));
+                                end_point = transform.position_from_point(&PlotPoint::new(returned_points[0].x, transform.bounds().max()[1]));
+                            }
+                            AxisKind::Both => {
+                                //need to leave this as a panic, so we don't need to import the Log::Levels
+                                panic!("Guide line has AxisKind::both, this shouldn't happen 236")
+                            }
                         }
+                
+                        let points = vec![
+                                start_point,
+                                end_point
+                            ];
+                        let line = Shape::line(points,Stroke::new(self.pattern_line_stroke_width/2.0,self.pattern_measurement_colour));
+                        shapes.push(line);
                     }
                 }
+                
             }
             ToolKind::Point(_) => {
                 //do nothing
