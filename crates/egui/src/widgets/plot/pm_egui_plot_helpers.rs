@@ -10,7 +10,6 @@ use pm_pattern_logic::{
     AxisKind, 
     SelectionModeKind, 
     set_render_to_index, 
-    handle_pm_error
 };
 use crate::Response;
 use super::{ScreenTransform, PlotPoint};
