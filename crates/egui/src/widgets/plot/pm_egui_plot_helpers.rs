@@ -109,7 +109,7 @@ impl PmEguiPlotHelpers{
         last_screen_transform : ScreenTransform
     )
     {
-        if response.drag_started(){ 
+        //if response.drag_started(){ 
             //test there is a click position
             if let Some(pointer_pos) = response.interact_pointer_pos() {
                 let render_to_index = self.pattern.read().unwrap().render_to_index.clone();
@@ -150,7 +150,7 @@ impl PmEguiPlotHelpers{
                     set_render_to_index(&self.pattern, render_to_index);
                 }
             } 
-        }
+        //}
     }
 
     pub (crate) fn plot_drag_handling(
@@ -175,7 +175,6 @@ impl PmEguiPlotHelpers{
         }else{
             return false;
         }
-        
     }
 
     pub (crate) fn get_shapes_for_live_hover_drawing(

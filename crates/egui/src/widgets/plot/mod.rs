@@ -901,15 +901,17 @@ impl Plot {
             }
         }
 
+        //lpc add - added this to hadle the clieck event, 
+        if response.clicked(){
+            pm_egui_plot_helpers
+            .read()
+            .unwrap()
+            .plot_click_handleing(response.clone(), last_screen_transform.clone());
+        }
         //lpc add - note that the code that drags the plot was from the original mod code.
         if response.dragged_by(PointerButton::Primary) {
             //todo lpc this currently has a limit of 1 and I'm not even sure it's doing anyting, should test to find the limt that stops code running when it's not required.
             //debug!("lpc - drag in the mod code - passing to click helper");
-            pm_egui_plot_helpers
-                .read()
-                .unwrap()
-                .plot_click_handleing(response.clone(), last_screen_transform.clone());
-
             if !pm_egui_plot_helpers
                 .read()
                 .unwrap()
