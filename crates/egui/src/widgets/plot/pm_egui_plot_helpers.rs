@@ -8,8 +8,7 @@ use pm_pattern_logic::{
     SelectedElements, 
     ToolKind, 
     AxisKind, 
-    SelectionModeKind, 
-    set_render_to_index, 
+    SelectionModeKind,
 };
 use crate::Response;
 use super::{ScreenTransform, PlotPoint};
@@ -111,7 +110,6 @@ impl PmEguiPlotHelpers{
         //if response.drag_started(){ 
             //test there is a click position
             if let Some(pointer_pos) = response.interact_pointer_pos() {
-                let render_to_index = self.pattern.read().unwrap().render_to_index.clone();
                 let position_value_from_position = last_screen_transform.value_from_position(pointer_pos);
                 let drag_pattern_pos = PatternPos{x: position_value_from_position.x, y: position_value_from_position.y};
                 
@@ -119,12 +117,12 @@ impl PmEguiPlotHelpers{
                 if select_mode == SelectionModeKind::Piece {
                     let selected_piece_option = self.pattern.read().unwrap().get_piece_from_position(drag_pattern_pos); 
                     if let Some(selected_piece) = selected_piece_option{
-                        self.drawing_tool.read().unwrap().get_current_tool().tool_action_piece_selected(drag_pattern_pos, Arc::clone(&self.pattern), Arc::clone(&self.selected_items), selected_piece, render_to_index);
+                        self.drawing_tool.read().unwrap().get_current_tool().tool_action_piece_selected(drag_pattern_pos, Arc::clone(&self.pattern), Arc::clone(&self.selected_items), selected_piece);
                     }
                 }else if select_mode == SelectionModeKind::LayoutPiece{
                     let selected_piece_option = self.pattern.read().unwrap().get_layout_piece_from_position(drag_pattern_pos, self.selected_items.read().unwrap().get_print_layout().clone()); 
                     if let Some(selected_piece) = selected_piece_option{
-                        self.drawing_tool.read().unwrap().get_current_tool().tool_action_piece_selected(drag_pattern_pos, Arc::clone(&self.pattern), Arc::clone(&self.selected_items), selected_piece, render_to_index);
+                        self.drawing_tool.read().unwrap().get_current_tool().tool_action_piece_selected(drag_pattern_pos, Arc::clone(&self.pattern), Arc::clone(&self.selected_items), selected_piece);
                     }
                 }else{
                     //let mut selected_piece_option : Option<Uuid> = None;
@@ -142,11 +140,10 @@ impl PmEguiPlotHelpers{
                         }
                     }
                     if let Some(element) = closest_element{
-                        self.drawing_tool.read().unwrap().get_current_tool().tool_action_item_selected(drag_pattern_pos, Arc::clone(&self.pattern), Arc::clone(&self.selected_items), element, render_to_index);
+                        self.drawing_tool.read().unwrap().get_current_tool().tool_action_item_selected(drag_pattern_pos, Arc::clone(&self.pattern), Arc::clone(&self.selected_items), element);
                     }else{
-                        self.drawing_tool.read().unwrap().get_current_tool().tool_action_no_item_selected(drag_pattern_pos, Arc::clone(&self.pattern), Arc::clone(&self.selected_items), render_to_index);
+                        self.drawing_tool.read().unwrap().get_current_tool().tool_action_no_item_selected(drag_pattern_pos, Arc::clone(&self.pattern), Arc::clone(&self.selected_items));
                     }
-                    set_render_to_index(&self.pattern, render_to_index);
                 }
             } 
         //}
@@ -164,8 +161,7 @@ impl PmEguiPlotHelpers{
             let drag_ids_option =  self.drawing_tool.read().unwrap().get_current_tool().get_draggable_items(Arc::clone(&self.pattern), Arc::clone(&self.selected_items));
             if let Some(drag_ids) = drag_ids_option{
                 if drag_ids.len() > 0{
-                    let render_to_index = self.pattern.read().unwrap().render_to_index.clone();
-                    self.drawing_tool.read().unwrap().get_current_tool().tool_action_drag_action(&self.pattern, &self.selected_items, drag_ids, Self::transform_plot_point_to_pattern_pos(PlotPoint::new(tranformed_delta.x, tranformed_delta.y)), render_to_index);
+                    self.drawing_tool.read().unwrap().get_current_tool().tool_action_drag_action(&self.pattern, &self.selected_items, drag_ids, Self::transform_plot_point_to_pattern_pos(PlotPoint::new(tranformed_delta.x, tranformed_delta.y)));
                 }
                 return true;
             }else{
