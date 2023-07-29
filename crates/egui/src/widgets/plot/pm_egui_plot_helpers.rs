@@ -129,12 +129,12 @@ impl PmEguiPlotHelpers{
                     let mut closest_element: Option<Box<dyn PatternElement>> = None;
                     if let Ok(the_elements) = self.pattern.read().unwrap().get_all_pattern_elements(){
                         //see if there is a closest point
-                        if let Some(element) = self.pattern.read().unwrap().get_closest_point_element(the_elements.clone(), drag_pattern_pos, last_screen_transform.bounds().min(), last_screen_transform.bounds().max()){
+                        if let Some(element) = self.pattern.read().unwrap().get_closest_point_element(the_elements.clone(), &drag_pattern_pos, last_screen_transform.bounds().min(), last_screen_transform.bounds().max()){
                             closest_element = Some(element.clone());
                             
                         }else{
                             //see if there is a closest other element that's not a point. 
-                            if let Some(element) = self.pattern.read().unwrap().get_closest_non_point_element(the_elements, drag_pattern_pos, last_screen_transform.bounds().min(), last_screen_transform.bounds().max()){
+                            if let Some(element) = self.pattern.read().unwrap().get_closest_non_point_element(the_elements, &drag_pattern_pos, last_screen_transform.bounds().min(), last_screen_transform.bounds().max()){
                                 closest_element = Some(element.clone());
                             }
                         }
