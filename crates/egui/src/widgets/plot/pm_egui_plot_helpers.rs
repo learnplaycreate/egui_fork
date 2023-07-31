@@ -179,18 +179,6 @@ impl PmEguiPlotHelpers{
     ) -> Vec<Shape>{
         let mut shapes : Vec<Shape> = vec![];
         match self.drawing_tool.read().unwrap().get_current_tool().get_drawing_tool_kind(){
-            ToolKind::Curve(_) |
-            ToolKind::Dart => {
-                if self.selected_items.read().unwrap().get_items().len() == 1 {
-                    let returned_live_shape_option= self.drawing_tool.read().unwrap().get_current_tool().get_live_drawing_position(Self::transform_plot_point_to_pattern_pos(transform.value_from_position(pointer)), Arc::clone(&self.pattern), Arc::clone(&self.selected_items));
-                    if let Some(returned_points) = returned_live_shape_option{
-                        if returned_points.len() == 2{
-                            let line = Shape::line(vec![transform.position_from_point(&Self::transform_pattern_pos_to_plot_point(returned_points[0])) , transform.position_from_point(&Self::transform_pattern_pos_to_plot_point(returned_points[1]))], Stroke::new(self.pattern_line_stroke_width, self.pattern_drawing_live_colour));
-                            shapes.push(line);
-                        }
-                    }
-                }
-            }
             //todo - lpc this is not working. 
             ToolKind::GuideLine(axis_kind) => { 
                 let returned_live_shape_option = self.drawing_tool.read().unwrap().get_current_tool().get_live_drawing_position(Self::transform_plot_point_to_pattern_pos(transform.value_from_position(pointer)), Arc::clone(&self.pattern), Arc::clone(&self.selected_items));
@@ -228,6 +216,15 @@ impl PmEguiPlotHelpers{
             }
             ToolKind::Select(_) => {
                 //do nothing
+            }
+            _ => {
+                let returned_live_shape_option= self.drawing_tool.read().unwrap().get_current_tool().get_live_drawing_position(Self::transform_plot_point_to_pattern_pos(transform.value_from_position(pointer)), Arc::clone(&self.pattern), Arc::clone(&self.selected_items));
+                if let Some(returned_points) = returned_live_shape_option{
+                    if returned_points.len() == 2{
+                        let line = Shape::line(vec![transform.position_from_point(&Self::transform_pattern_pos_to_plot_point(returned_points[0])) , transform.position_from_point(&Self::transform_pattern_pos_to_plot_point(returned_points[1]))], Stroke::new(self.pattern_line_stroke_width, self.pattern_drawing_live_colour));
+                        shapes.push(line);
+                    }
+                }
             }
         }
         return shapes;
