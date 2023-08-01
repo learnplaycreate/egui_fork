@@ -214,7 +214,10 @@ impl PmEguiPlotHelpers{
             ToolKind::Point |
             ToolKind::PointBody |
             ToolKind::PointNotch(_) |
-            ToolKind::Select(_) => {
+            ToolKind::SelectDrafting |
+            ToolKind::SelectDraftingPointOnly |
+            ToolKind::SelectLayoutPiece |
+            ToolKind::SelectPiece => {
                 //do nothing
             }
             _ => {
