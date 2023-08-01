@@ -211,9 +211,9 @@ impl PmEguiPlotHelpers{
                 }
                 
             }
-            ToolKind::Point(_) => {
-                //do nothing
-            }
+            ToolKind::Point |
+            ToolKind::PointBody |
+            ToolKind::PointNotch(_) |
             ToolKind::Select(_) => {
                 //do nothing
             }
