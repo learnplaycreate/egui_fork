@@ -120,7 +120,7 @@ impl PmEguiPlotHelpers{
                         self.drawing_tool.read().unwrap().get_current_tool().tool_action_piece_selected(drag_pattern_pos, Arc::clone(&self.pattern), Arc::clone(&self.selected_items), selected_piece);
                     }
                 }else if select_mode == SelectionModeKind::LayoutPiece{
-                    let selected_piece_option = self.pattern.read().unwrap().get_layout_piece_from_position(drag_pattern_pos, self.selected_items.read().unwrap().get_print_layout().clone()); 
+                    let selected_piece_option = self.pattern.read().unwrap().get_layout_piece_from_position(drag_pattern_pos, self.selected_items.read().unwrap().get_print_layout()); 
                     if let Some(selected_piece) = selected_piece_option{
                         self.drawing_tool.read().unwrap().get_current_tool().tool_action_piece_selected(drag_pattern_pos, Arc::clone(&self.pattern), Arc::clone(&self.selected_items), selected_piece);
                     }
@@ -130,12 +130,12 @@ impl PmEguiPlotHelpers{
                     if let Ok(the_elements) = self.pattern.read().unwrap().get_all_pattern_elements(){
                         //see if there is a closest point
                         if let Some(element) = self.pattern.read().unwrap().get_closest_point_element(&the_elements, &drag_pattern_pos, last_screen_transform.bounds().min(), last_screen_transform.bounds().max()){
-                            closest_element = Some(element.clone());
+                            closest_element = Some(element);
                             
                         }else{
                             //see if there is a closest other element that's not a point. 
                             if let Some(element) = self.pattern.read().unwrap().get_closest_non_point_element(&the_elements, &drag_pattern_pos, last_screen_transform.bounds().min(), last_screen_transform.bounds().max()){
-                                closest_element = Some(element.clone());
+                                closest_element = Some(element);
                             }
                         }
                     }
