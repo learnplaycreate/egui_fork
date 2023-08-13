@@ -463,7 +463,7 @@ impl Clone for NativeOptions {
 impl Default for NativeOptions {
     fn default() -> Self {
         Self {
-            state: Arc::new(World::new()),
+            state: Arc::new(RwLock::new(World::new())),
             always_on_top: false,
             maximized: false,
             decorated: true,
