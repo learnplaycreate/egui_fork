@@ -452,7 +452,7 @@ impl Clone for NativeOptions {
             wgpu_options: self.wgpu_options.clone(),
 
             app_id: self.app_id.clone(),
-
+            state: self.state.clone(),
             ..*self
         }
     }
