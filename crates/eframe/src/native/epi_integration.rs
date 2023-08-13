@@ -499,7 +499,11 @@ impl EpiIntegration {
         // Run user code:
         let full_output = self.egui_ctx.run(raw_input, |egui_ctx| {
             crate::profile_scope!("App::update");
-            app.update(egui_ctx, &mut self.frame, self.native_options.state);
+            app.update(
+                egui_ctx,
+                &mut self.frame,
+                Arc::clone(&self.native_options.state),
+            );
         });
 
         self.pending_full_output.append(full_output);
@@ -586,7 +590,7 @@ impl EpiIntegration {
             }
             {
                 crate::profile_scope!("App::save");
-                _app.save(storage, self.native_options.state);
+                _app.save(storage, Arc::clone(&self.native_options.state));
             }
 
             crate::profile_scope!("Storage::flush");
