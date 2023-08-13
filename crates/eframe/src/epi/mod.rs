@@ -432,6 +432,12 @@ pub struct NativeOptions<T> {
     pub app_id: Option<String>,
 }
 
+impl NativeOptions<T> {
+    pub fn set_state(state: T) {
+        self.state = Some(state);
+    }
+}
+
 #[cfg(not(target_arch = "wasm32"))]
 impl Clone for NativeOptions {
     fn clone(&self) -> Self {
