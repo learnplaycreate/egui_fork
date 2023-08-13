@@ -77,7 +77,7 @@ pub trait App {
     /// The [`egui::Context`] can be cloned and saved if you like.
     ///
     /// To force a repaint, call [`egui::Context::request_repaint`] at any time (e.g. from another thread).
-    fn update(&mut self, ctx: &egui::Context, frame: &mut Frame, test: usize);
+    fn update(&mut self, ctx: &egui::Context, frame: &mut Frame, test: &mut Option<dyn Any>);
 
     /// Get a handle to the app.
     ///
