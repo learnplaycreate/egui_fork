@@ -270,8 +270,10 @@ pub fn run_native(
 pub fn run_simple_native(
     app_name: &str,
     native_options: NativeOptions,
-    update_fun: impl FnMut(&egui::Context, &mut Frame, &mut World) + 'static,
+    update_fun: impl FnMut(&egui::Context, &mut Frame, Arc<World>) + 'static,
 ) -> Result<()> {
+    use std::sync::Arc;
+
     unimplemented!("test 275")
     // use bevy_ecs::world::World;
 
