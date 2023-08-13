@@ -325,6 +325,7 @@ pub fn create_storage(_app_name: &str) -> Option<Box<dyn epi::Storage>> {
 
 /// Everything needed to make a winit-based integration for [`epi`].
 pub struct EpiIntegration {
+    native_options: &crate::NativeOptions,
     pub frame: epi::Frame,
     last_auto_save: std::time::Instant,
     pub egui_ctx: egui::Context,
@@ -392,6 +393,7 @@ impl EpiIntegration {
         );
 
         Self {
+            native_options,
             frame,
             last_auto_save: std::time::Instant::now(),
             egui_ctx,
@@ -497,7 +499,7 @@ impl EpiIntegration {
         // Run user code:
         let full_output = self.egui_ctx.run(raw_input, |egui_ctx| {
             crate::profile_scope!("App::update");
-            app.update(egui_ctx, &mut self.frame);
+            app.update(egui_ctx, &mut self.frame, &mut self.native_options.state);
         });
 
         self.pending_full_output.append(full_output);

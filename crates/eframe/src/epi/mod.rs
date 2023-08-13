@@ -77,7 +77,7 @@ pub trait App {
     /// The [`egui::Context`] can be cloned and saved if you like.
     ///
     /// To force a repaint, call [`egui::Context::request_repaint`] at any time (e.g. from another thread).
-    fn update(&mut self, ctx: &egui::Context, frame: &mut Frame);
+    fn update(&mut self, ctx: &egui::Context, frame: &mut Frame, test: usize);
 
     /// Get a handle to the app.
     ///
@@ -228,7 +228,9 @@ pub enum HardwareAcceleration {
 ///
 /// Only a single native window is currently supported.
 #[cfg(not(target_arch = "wasm32"))]
-pub struct NativeOptions {
+pub struct NativeOptions<T> {
+    pub state: Option<T>,
+
     /// Sets whether or not the window will always be on top of other windows at initialization.
     pub always_on_top: bool,
 
@@ -453,6 +455,7 @@ impl Clone for NativeOptions {
 impl Default for NativeOptions {
     fn default() -> Self {
         Self {
+            state: None,
             always_on_top: false,
             maximized: false,
             decorated: true,
