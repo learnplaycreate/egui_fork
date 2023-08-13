@@ -272,7 +272,7 @@ pub fn run_simple_native(
     native_options: NativeOptions,
     update_fun: impl FnMut(&egui::Context, &mut Frame, &mut World) + 'static,
 ) -> Result<()> {
-    return Err("testing error 275");
+    unimplemented!("test 275")
     // use bevy_ecs::world::World;
 
     // struct SimpleApp<U> {
