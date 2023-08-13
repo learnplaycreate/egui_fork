@@ -81,7 +81,7 @@ android-native-activity = ["egui-winit/android-native-activity"]
 android-game-activity = ["egui-winit/android-game-activity"]
 
 [dependencies]
-egui = { version = "0.22.0", path = "../egui", default-features = false, features = [
+egui = { version = "0.22.0", default-features = false, features = [
   "bytemuck",
   "log",
 ] }
