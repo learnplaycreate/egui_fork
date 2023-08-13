@@ -111,7 +111,7 @@ pub trait App {
     ///
     /// where `APP_ID` is determined by either [`NativeOptions::app_id`] or
     /// the title argument to [`crate::run_native`].
-    fn save(&mut self, _storage: &mut dyn Storage) {}
+    fn save(&mut self, _storage: &mut dyn Storage, test: &mut Option<dyn Any>) {}
 
     /// Called when the user attempts to close the desktop window and/or quit the application.
     ///

@@ -586,7 +586,7 @@ impl EpiIntegration {
             }
             {
                 crate::profile_scope!("App::save");
-                _app.save(storage);
+                _app.save(storage, &mut self.native_options.state);
             }
 
             crate::profile_scope!("Storage::flush");
