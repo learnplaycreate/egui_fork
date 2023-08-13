@@ -1,3 +1,5 @@
+use std::sync::Arc;
+
 use winit::event_loop::EventLoopWindowTarget;
 
 #[cfg(target_os = "macos")]
