@@ -125,7 +125,7 @@
 #![allow(clippy::needless_doctest_main)]
 
 use bevy_ecs::prelude::World;
-use std::sync::Arc;
+use std::sync::{Arc, RwLock};
 
 // Re-export all useful libraries:
 pub use {egui, egui::emath, egui::epaint};
