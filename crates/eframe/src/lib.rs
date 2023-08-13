@@ -274,7 +274,7 @@ pub fn run_simple_native(
     }
     impl<U: FnMut(&egui::Context, &mut Frame)> App for SimpleApp<U> {
         fn update(&mut self, ctx: &egui::Context, frame: &mut Frame) {
-            (self.update_fun)(ctx, frame);
+            (self.update_fun)(ctx, frame, &mut native_options.state);
         }
     }
 
