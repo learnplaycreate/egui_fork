@@ -12,7 +12,7 @@
 //! ## Usage, native:
 //! ``` no_run
 //! use eframe::egui;
-//! use bevy_ecs::prelude::World;
+//!
 //!
 //! fn main() {
 //!     let native_options = eframe::NativeOptions::default();
@@ -123,6 +123,8 @@
 //!
 
 #![allow(clippy::needless_doctest_main)]
+
+use bevy_ecs::prelude::World;
 
 // Re-export all useful libraries:
 pub use {egui, egui::emath, egui::epaint};
@@ -270,22 +272,23 @@ pub fn run_simple_native(
     native_options: NativeOptions,
     update_fun: impl FnMut(&egui::Context, &mut Frame, &mut World) + 'static,
 ) -> Result<()> {
-    use bevy_ecs::world::World;
+    return Err("testing error 275");
+    // use bevy_ecs::world::World;
 
-    struct SimpleApp<U> {
-        update_fun: U,
-    }
-    impl<U: FnMut(&egui::Context, &mut Frame, &mut World)> App for SimpleApp<U> {
-        fn update(&mut self, ctx: &egui::Context, frame: &mut Frame, state: &mut World) {
-            (self.update_fun)(ctx, frame, state);
-        }
-    }
+    // struct SimpleApp<U> {
+    //     update_fun: U,
+    // }
+    // impl<U: FnMut(&egui::Context, &mut Frame, &mut World)> App for SimpleApp<U> {
+    //     fn update(&mut self, ctx: &egui::Context, frame: &mut Frame, state: &mut World) {
+    //         (self.update_fun)(ctx, frame, state);
+    //     }
+    // }
 
-    run_native(
-        app_name,
-        native_options,
-        Box::new(|_cc| Box::new(SimpleApp { update_fun })),
-    )
+    // run_native(
+    //     app_name,
+    //     native_options,
+    //     Box::new(|_cc| Box::new(SimpleApp { update_fun })),
+    // )
 }
 
 // ----------------------------------------------------------------------------
