@@ -272,9 +272,9 @@ pub fn run_simple_native(
     struct SimpleApp<U> {
         update_fun: U,
     }
-    impl<U: FnMut(&egui::Context, &mut Frame)> App for SimpleApp<U> {
-        fn update(&mut self, ctx: &egui::Context, frame: &mut Frame) {
-            (self.update_fun)(ctx, frame, &mut native_options.state);
+    impl<U: FnMut(&egui::Context, &mut Frame, &mut Option<Box<dyn Any>>)> App for SimpleApp<U> {
+        fn update(&mut self, ctx: &egui::Context, frame: &mut Frame, _: &mut Option<Box<dyn Any>>) {
+            (self.update_fun)(ctx, frame);
         }
     }
 
