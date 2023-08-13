@@ -433,7 +433,7 @@ pub struct NativeOptions {
 }
 
 impl NativeOptions {
-    pub fn set_state(state: Box<dyn Any>) {
+    pub fn set_state(&mut self, state: Box<dyn Any>) {
         self.state = Some(state);
     }
 }
