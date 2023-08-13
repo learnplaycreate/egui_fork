@@ -6,11 +6,10 @@
 
 #![warn(missing_docs)] // Let's keep `epi` well-documented.
 
-use std::any::Any;
-
 #[cfg(not(target_arch = "wasm32"))]
 mod icon_data;
 
+use bevy_ecs::world::World;
 #[cfg(not(target_arch = "wasm32"))]
 pub use icon_data::IconData;
 
@@ -79,7 +78,7 @@ pub trait App {
     /// The [`egui::Context`] can be cloned and saved if you like.
     ///
     /// To force a repaint, call [`egui::Context::request_repaint`] at any time (e.g. from another thread).
-    fn update(&mut self, ctx: &egui::Context, frame: &mut Frame, test: &mut Option<Box<dyn Any>>);
+    fn update(&mut self, ctx: &egui::Context, frame: &mut Frame, test: &mut Option<World>);
 
     /// Get a handle to the app.
     ///
@@ -113,7 +112,7 @@ pub trait App {
     ///
     /// where `APP_ID` is determined by either [`NativeOptions::app_id`] or
     /// the title argument to [`crate::run_native`].
-    fn save(&mut self, _storage: &mut dyn Storage, test: &mut Option<Box<dyn Any>>) {}
+    fn save(&mut self, _storage: &mut dyn Storage, test: &mut Option<World>) {}
 
     /// Called when the user attempts to close the desktop window and/or quit the application.
     ///
@@ -231,7 +230,7 @@ pub enum HardwareAcceleration {
 /// Only a single native window is currently supported.
 #[cfg(not(target_arch = "wasm32"))]
 pub struct NativeOptions {
-    pub state: Option<Box<dyn Any>>,
+    pub state: Option<World>,
 
     /// Sets whether or not the window will always be on top of other windows at initialization.
     pub always_on_top: bool,
