@@ -123,6 +123,8 @@
 
 #![allow(clippy::needless_doctest_main)]
 
+use std::any::Any;
+
 // Re-export all useful libraries:
 pub use {egui, egui::emath, egui::epaint};
 
