@@ -15,7 +15,7 @@ pub use icon_data::IconData;
 
 #[cfg(target_arch = "wasm32")]
 use std::any::Any;
-use std::sync::Arc;
+use std::sync::{Arc, RwLock};
 
 #[cfg(not(target_arch = "wasm32"))]
 #[cfg(any(feature = "glow", feature = "wgpu"))]
