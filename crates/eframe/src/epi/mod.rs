@@ -78,7 +78,7 @@ pub trait App {
     /// The [`egui::Context`] can be cloned and saved if you like.
     ///
     /// To force a repaint, call [`egui::Context::request_repaint`] at any time (e.g. from another thread).
-    fn update(&mut self, ctx: &egui::Context, frame: &mut Frame, test: &mut Option<World>);
+    fn update(&mut self, ctx: &egui::Context, frame: &mut Frame, test: &mut World);
 
     /// Get a handle to the app.
     ///
@@ -112,7 +112,7 @@ pub trait App {
     ///
     /// where `APP_ID` is determined by either [`NativeOptions::app_id`] or
     /// the title argument to [`crate::run_native`].
-    fn save(&mut self, _storage: &mut dyn Storage, test: &mut Option<World>) {}
+    fn save(&mut self, _storage: &mut dyn Storage, test: &mut World) {}
 
     /// Called when the user attempts to close the desktop window and/or quit the application.
     ///
@@ -230,7 +230,7 @@ pub enum HardwareAcceleration {
 /// Only a single native window is currently supported.
 #[cfg(not(target_arch = "wasm32"))]
 pub struct NativeOptions {
-    pub state: Option<World>,
+    pub state: World,
 
     /// Sets whether or not the window will always be on top of other windows at initialization.
     pub always_on_top: bool,
@@ -434,8 +434,8 @@ pub struct NativeOptions {
 }
 
 impl NativeOptions {
-    pub fn set_state<T>(&mut self, state: Box<T>) {
-        self.state = Some(state);
+    pub fn set_state(&mut self, state: World) {
+        self.state = state;
     }
 }
 
@@ -462,7 +462,7 @@ impl Clone for NativeOptions {
 impl Default for NativeOptions {
     fn default() -> Self {
         Self {
-            state: None,
+            state: World::new(),
             always_on_top: false,
             maximized: false,
             decorated: true,
