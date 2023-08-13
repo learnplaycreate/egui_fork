@@ -6,6 +6,8 @@
 
 #![warn(missing_docs)] // Let's keep `epi` well-documented.
 
+use std::any::Any;
+
 #[cfg(not(target_arch = "wasm32"))]
 mod icon_data;
 
